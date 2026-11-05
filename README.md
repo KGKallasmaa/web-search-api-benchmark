@@ -296,3 +296,19 @@ November 5, 2026. Prices were read on November 5, 2026.
 cloro, "Web Search API Benchmark 2026", November 2026,
 https://github.com/cloro-dev/web-search-api-benchmark. Results are also on
 [cloro.dev/blog/best-search-api](https://cloro.dev/blog/best-search-api/).
+
+## License and data sources
+
+The code and the reports are under the [MIT License](LICENSE). The files in
+`runs/*/results/` hold the question and answer text of three public datasets.
+That text stays under the license of its source:
+
+| Dataset | Source | License | Changes in this repo |
+|---|---|---|---|
+| SimpleQA Verified | [google/simpleqa-verified](https://huggingface.co/datasets/google/simpleqa-verified) | MIT | None |
+| FreshQA | [freshllms/freshqa](https://github.com/freshllms/freshqa), version of April 21, 2026 | Apache-2.0 (repository) | Test split only, without the fast-changing questions and the questions past their review date |
+| VerticalRTK | [TakoData/VerticalRTK](https://github.com/TakoData/VerticalRTK), fast set, commit f3f8628 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Without the 17 questions that have a capture timestamp or a forecast |
+
+If you use these datasets, cite their authors as their pages ask: the
+SimpleQA Verified technical report, the FreshLLMs paper (arXiv:2310.03214) and
+VerticalRTK by Tako.
