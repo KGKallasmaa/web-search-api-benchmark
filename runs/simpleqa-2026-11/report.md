@@ -212,7 +212,7 @@ per-question means (304 x 11,113 + 307 x 3,291) is about 4.39 million.
 | API | Calls | Cost |
 |---|---|---|
 | cloro | 1,000 calls with AI Overview, sync, 1,006 HTTP attempts | about 7,000 credits (estimate, not measured) |
-| SerpApi | 1,970 searches (1,000 plus 970 AI Overview follow-ups), 1,995 HTTP requests | `eng-benchmark` account |
+| SerpApi | 1,970 searches (1,000 plus 970 AI Overview follow-ups), 1,995 HTTP requests | SerpApi account dashboard |
 | Tavily | 1,000 basic searches | 1,000 credits |
 | Exa | 1,000 | $7.00 (sum of `costDollars`) |
 | Parallel | 1,000 | Not found in the response |

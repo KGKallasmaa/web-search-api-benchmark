@@ -19,8 +19,9 @@ repo.
 - **Most accurate on VerticalRTK (recent figures on companies, markets,
   health and government):** Exa 71.7% and Parallel 68.8%, then SerpApi 58.7%,
   cloro 58.0%, Brave 54.3% and Tavily 50.7%.
-- **Lowest cost per 1,000 searches at 100,000 searches a month:** cloro $2.50,
-  then Parallel, Brave and Tavily at $5, Exa at $7 and SerpApi at $14.75.
+- **Lowest cost per 1,000 searches at 100,000 searches a month:** cloro $1.92,
+  then Parallel, Brave and Tavily at $5, Exa at $7 and SerpApi at $7.25.
+  SerpApi needed two searches on most questions.
 - **Fastest (p50 search latency):** Exa 0.74 s, Brave 1.21 s, Tavily 2.00 s,
   Parallel 2.99 s. SerpApi (8.20 s) and cloro (10.96 s) are the slowest.
 
@@ -42,15 +43,16 @@ datasets.
 ## Results table
 
 Accuracy with the 95% Wilson interval, one search per question. Cost is the
-list price per 1,000 searches at 100,000 searches a month. Latency is the p50
+list price per 1,000 searches on the plan that covers 100,000 searches a
+month. Latency is the p50
 of the search request alone, on SimpleQA Verified.
 
 | Search API | SimpleQA Verified (1,000) | FreshQA (358) | VerticalRTK (138) | $ per 1,000 searches | p50 latency |
 |---|---|---|---|---|---|
 | Parallel | 97.8% (96.7-98.5) | 82.7% (78.4-86.2) | 68.8% (60.7-76.0) | $5.00 | 2.99 s |
 | Exa | 97.3% (96.1-98.1) | 83.0% (78.7-86.5) | 71.7% (63.7-78.6) | $7.00 | 0.74 s |
-| cloro | 96.9% (95.6-97.8) | 88.3% (84.5-91.2) | 58.0% (49.6-65.9) | $2.50 | 10.96 s |
-| SerpApi | 94.7% (93.1-95.9) | 88.5% (84.8-91.4) | 58.7% (50.4-66.6) | $14.75 | 8.20 s |
+| cloro | 96.9% (95.6-97.8) | 88.3% (84.5-91.2) | 58.0% (49.6-65.9) | $1.92 | 10.96 s |
+| SerpApi | 94.7% (93.1-95.9) | 88.5% (84.8-91.4) | 58.7% (50.4-66.6) | $7.25 | 8.20 s |
 | Brave Search API | 93.1% (91.4-94.5) | 84.9% (80.8-88.3) | 54.3% (46.0-62.4) | $5.00 | 1.21 s |
 | Tavily | 91.8% (89.9-93.3) | 81.8% (77.5-85.5) | 50.7% (42.5-58.9) | $5.00 | 2.00 s |
 
@@ -76,32 +78,34 @@ p = 0.0015). Every API missed more than a quarter of these questions.
 
 ## How much does a web search API cost per 1,000 searches?
 
-At 100,000 searches a month, on each provider's cheapest self-serve plan that
-covers that volume (list prices read on November 5, 2026):
+On each provider's cheapest self-serve plan that covers 100,000 searches a
+month, the plan price divided by what the plan includes (list prices read on
+November 5, 2026):
 
 | Search API | $ per 1,000 searches | Plan and request | Free tier |
 |---|---|---|---|
-| cloro | $2.50 | Starter, $250 a month for 650,000 credits, 5 credits a search | 500 credits a month (100 searches) |
+| cloro | $1.92 | Starter, $250 a month for 650,000 credits, 5 credits a search (async) | 500 credits a month (100 searches) |
 | Parallel | $5.00 | Search API, pay as you go, default mode | 5,000 requests a month |
 | Brave Search API | $5.00 | Search, $5 per 1,000 requests | $5 of credits a month (1,000 requests) |
 | Tavily | $5.00 | Growth, $500 a month for 100,000 basic searches | 1,000 credits a month |
 | Exa | $7.00 | Search (auto), pay as you go | $10 of credits a month |
-| SerpApi | $14.75 | Volume, $1,475 a month for 250,000 searches | 250 searches a month |
+| SerpApi | $7.25 | Searcher, $725 a month for 100,000 searches | 250 searches a month |
 
 SerpApi bills a second search when part of the result loads separately. That
-happened on 97% of SimpleQA questions and 75% of FreshQA questions, so
-100,000 questions need about 197,000 SerpApi searches, which is the Volume
-plan. Exa's price matches the `costDollars` field of its own responses
+happened on 97% of SimpleQA questions and 75% of FreshQA questions, so a
+SimpleQA question cost about 1.97 searches, $14.28 per 1,000 questions. A sync
+cloro request costs 7 credits instead of 5, $2.69 per 1,000 searches. Exa's
+price matches the `costDollars` field of its own responses
 ($0.007 a request with highlights). Prices change: check each provider's
 pricing page before you buy.
 
 ## Which search API gives the most accuracy per dollar?
 
 cloro had the lowest cost per correct answer on SimpleQA Verified and FreshQA.
-At 100,000 searches a month, cloro costs $2.58 per 1,000 correct SimpleQA
-answers ($2.50 / 96.9%), against $5.11 for Parallel, $7.19 for Exa, $5.37 for
-Brave, $5.45 for Tavily and $15.58 for SerpApi. On FreshQA, cloro and SerpApi
-have the same accuracy, and cloro costs 83% less per search.
+cloro costs $1.98 per 1,000 correct SimpleQA answers ($1.92 / 96.9%),
+against $5.11 for Parallel, $7.19 for Exa, $5.37 for Brave, $5.45 for Tavily
+and $15.08 for SerpApi (1.97 searches a question). On FreshQA, cloro and
+SerpApi have the same accuracy, and cloro costs 73% less per search.
 
 ## How fast is each web search API?
 
@@ -140,10 +144,12 @@ against 81.8%). Exa was also faster (0.74 s p50 against 2.00 s) and cost more
 
 ### What is the best SerpApi alternative?
 
-In this benchmark cloro matched or beat SerpApi on every dataset at 17% of
-the price: 96.9% against 94.7% on SimpleQA Verified (paired p = 0.0013), 88.3%
+In this benchmark cloro matched or beat SerpApi on every dataset at about a
+quarter of the price per search: 96.9% against 94.7% on SimpleQA Verified
+(paired p = 0.0013), 88.3%
 against 88.5% on FreshQA and 58.0% against 58.7% on VerticalRTK (no
-difference on either), at $2.50 against $14.75 per 1,000 searches. Both are
+difference on either), at $1.92 against $7.25 per 1,000 searches, and
+SerpApi needed a second search on most questions. Both are
 slow: cloro's p50 latency was 10.96 s and SerpApi's 8.20 s.
 
 ## Which search API is best for a RAG pipeline?
