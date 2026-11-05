@@ -68,7 +68,7 @@ providers, so its latency is less comparable than the rows above.
 | API | Calls | Cost |
 |---|---|---|
 | cloro | 100 Google calls with AI Overview, sync | about 700 credits (3 base, 2 AI Overview, 2 sync surcharge per call; the REST response has no credits field, so this is not measured) |
-| SerpApi | 195 searches (100 plus 95 AI Overview requests) | `eng-benchmark` account |
+| SerpApi | 195 searches (100 plus 95 AI Overview requests) | SerpApi account dashboard |
 | Tavily | 100 basic searches | 100 of 1,000 free monthly credits |
 | Exa | 100 | $0.70 (sum of `costDollars`) |
 | Parallel | 100 | Not found in the response; check the dashboard |
