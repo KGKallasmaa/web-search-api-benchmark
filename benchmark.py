@@ -26,7 +26,7 @@ Providers and keys:
   exa       EXA_API_KEY       type=auto, highlights
   parallel  PARALLEL_API_KEY  default mode
   brave     BRAVE_API_KEY     extra_snippets=true
-  keenable  KEENABLE_API_KEY  default mode (pro)
+  keenable  (optional) KEENABLE_API_KEY  official SDK, default mode (pro), keyless without the key
 
 Reader and grader: OPENAI_API_KEY, READER_MODEL, GRADER_MODEL.
 With --search-only, no LLM is called: the run measures latency only.
@@ -51,6 +51,7 @@ import random
 import re
 import statistics
 import sys
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -95,21 +96,29 @@ class Timed:
         self.ok_s = 0.0  # sum of the successful attempts (a user waits this long)
         self.calls = 0
 
-    def http(self, url, body=None, headers=None):
-        data = json.dumps(body).encode() if body is not None else None
-        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json", **(headers or {})})
+    def call(self, fn, retry_on):
+        """Run fn with up to 3 attempts and add the successful attempt's time."""
         for attempt in range(3):
             self.calls += 1
             t0 = time.perf_counter()
             try:
-                with urllib.request.urlopen(req, timeout=TIMEOUT_S) as r:
-                    payload = r.read()
+                out = fn()
                 self.ok_s += time.perf_counter() - t0
-                return json.loads(payload)
-            except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError):
+                return out
+            except retry_on:
                 if attempt == 2:
                     raise
                 time.sleep(5 * (attempt + 1))
+
+    def http(self, url, body=None, headers=None):
+        data = json.dumps(body).encode() if body is not None else None
+        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json", **(headers or {})})
+
+        def fetch():
+            with urllib.request.urlopen(req, timeout=TIMEOUT_S) as r:
+                return r.read()
+
+        return json.loads(self.call(fetch, (urllib.error.HTTPError, urllib.error.URLError, TimeoutError)))
 
 
 def block(title, url, text):
@@ -207,13 +216,21 @@ def search_brave(t, q):
     return d, [block(r.get("title"), r.get("url"), "\n".join([r.get("description") or ""] + (r.get("extra_snippets") or []))) for r in results], False
 
 
+_keenable_client = None
+_keenable_lock = threading.Lock()
+
+
 def search_keenable(t, q):
-    d = t.http(
-        "https://api.keenable.ai/v1/search",
-        {"query": q, "max_results": NUM_RESULTS},
-        {"X-API-Key": os.environ["KEENABLE_API_KEY"]},
-    )
-    return d, [block(r.get("title"), r.get("url"), "\n".join(filter(None, [r.get("description"), r.get("snippet")]))) for r in d.get("results") or []], False
+    # Official SDK (pip install keenable). Keyless by default: with no
+    # KEENABLE_API_KEY it calls the public endpoint, capped at 1,000 requests
+    # an hour per IP; with the key set it uses the keyed endpoint.
+    global _keenable_client
+    from keenable import Keenable, KeenableAPIError, KeenableConnectionError
+    with _keenable_lock:
+        if _keenable_client is None:
+            _keenable_client = Keenable(timeout=TIMEOUT_S, client_source="web-search-api-benchmark")
+    r = t.call(lambda: _keenable_client.search(q, max_results=NUM_RESULTS), (KeenableAPIError, KeenableConnectionError))
+    return r.raw, [block(x.title, x.url, "\n".join(filter(None, [x.description, x.snippet]))) for x in r.results], False
 
 
 PROVIDERS = {
