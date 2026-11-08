@@ -26,6 +26,7 @@ Providers and keys:
   exa       EXA_API_KEY       type=auto, highlights
   parallel  PARALLEL_API_KEY  default mode
   brave     BRAVE_API_KEY     extra_snippets=true
+  keenable  KEENABLE_API_KEY  default mode (pro)
 
 Reader and grader: OPENAI_API_KEY, READER_MODEL, GRADER_MODEL.
 With --search-only, no LLM is called: the run measures latency only.
@@ -206,6 +207,15 @@ def search_brave(t, q):
     return d, [block(r.get("title"), r.get("url"), "\n".join([r.get("description") or ""] + (r.get("extra_snippets") or []))) for r in results], False
 
 
+def search_keenable(t, q):
+    d = t.http(
+        "https://api.keenable.ai/v1/search",
+        {"query": q, "max_results": NUM_RESULTS},
+        {"X-API-Key": os.environ["KEENABLE_API_KEY"]},
+    )
+    return d, [block(r.get("title"), r.get("url"), "\n".join(filter(None, [r.get("description"), r.get("snippet")]))) for r in d.get("results") or []], False
+
+
 PROVIDERS = {
     "cloro": search_cloro,
     "cloro-noaio": lambda t, q: search_cloro(t, q, with_aio=False),
@@ -214,6 +224,7 @@ PROVIDERS = {
     "exa": search_exa,
     "parallel": search_parallel,
     "brave": search_brave,
+    "keenable": search_keenable,
 }
 
 

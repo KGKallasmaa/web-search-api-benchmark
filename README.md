@@ -186,6 +186,7 @@ Every provider got the same setup:
 | Exa | `type=auto`, highlights | title, url, highlights |
 | Parallel | default mode, objective and query = the question | title, url, excerpts |
 | Brave Search API | `extra_snippets=true` | title, url, description, extra snippets |
+| Keenable | default mode (`pro`) | title, url, description, snippet |
 
 The answer features that providers sell as separate options (Tavily
 `include_answer`, Exa `summary`) are off, because they are not part of a
@@ -233,9 +234,10 @@ keys of the providers you want to test:
 | Exa | `EXA_API_KEY` |
 | Parallel | `PARALLEL_API_KEY` |
 | Brave | `BRAVE_API_KEY` |
+| Keenable | `KEENABLE_API_KEY` |
 
 ```bash
-python3 benchmark.py --providers cloro,serpapi,tavily,exa,parallel,brave --n 1000 --workers 4
+python3 benchmark.py --providers cloro,serpapi,tavily,exa,parallel,brave,keenable --n 1000 --workers 4
 ```
 
 Run `--n 3` first to find a broken key before you spend the budget.
